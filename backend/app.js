@@ -21,13 +21,20 @@ connectDatabase();
 // ✅ Fix EventEmitter warning
 process.setMaxListeners(0);
 
-// Middlewares
+const allowedOrigins = process.env.CORS_ORIGIN.split(",");
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      const msg = "CORS not allowed for this origin.";
+      return callback(new Error(msg), false);
+    },
     credentials: true,
   })
 );
+
 
 // ✅ CRITICAL: Increase limits to prevent payload errors
 app.use(
